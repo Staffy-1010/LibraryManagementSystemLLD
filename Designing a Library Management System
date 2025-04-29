@@ -1,0 +1,210 @@
+Designing a Library Management System
+-------------------------------------
+Requirements
+The library management system should allow librarians to manage books, members, and borrowing activities.
+The system should support adding, updating, and removing books from the library catalog.
+Each book should have details such as title, author, ISBN, publication year, and availability status.
+The system should allow members to borrow and return books.
+Each member should have details such as name, member ID,
+
+---------------------------------------
+
+Objects
+---------------------------------------
+Book
+	String id;
+	String title;
+	String author;
+	String ISBN;
+	int publicationYear;
+
+Member
+	String memberID;
+	String name;
+	String emailId;
+	double fine;
+	Map<Book,BorrowDate> booksBorrowedCurrently;
+	Map<Book,List<BorrowDate>> booksBorrowedInPast;
+
+BorrowDate
+	LocalDateTime borrowDate;
+	LocalDateTime returnDate;
+
+-------------------------------------
+
+BookController
+	Map<Book,Integer> totalBooks; // lets say multiple book "abc" is there.
+	Map<Book,Integer> borrowed;
+
+	addBook();
+	removeBook();M
+
+MemberController
+	List<Member> members;
+
+	addMember();
+	removeMember();
+	updateMember();
+
+LibraryService
+	borrowBook();
+	getAvailabilityOfBook();
+	returnBook();
+
+-------------------------------------
+
+class Book{
+	String id;
+	String title;
+	String author;
+	String ISBN;
+	int publicationYear;
+
+	//getters and setter;
+}
+
+class BookController{
+	Map<Book,Integer> totalBooks; // lets say multiple book "abc" is there.
+	Map<Book,Integer> borrowed;
+
+	addBook(Book book){
+		totalBooks.put(book, totalBooks.getOrDefault(book, 0) + 1);
+	}
+	removeBook(Book book){
+		totalBooks.remove(book);
+	}
+}
+
+class Member{
+	String memberID;
+	String name;
+	String emailId;
+	double fine;
+	Map<Book,BorrowDate> booksBorrowedCurrently;
+	Map<Book,List<BorrowDate>> booksBorrowedInPast;
+}
+
+class MemberController{
+	List<Member> members;
+
+	addMember(Member member){
+		members.add(member);
+	}
+	removeMember(){
+		member.remove(member);
+	}
+}
+
+class LibraryManager{
+	BookController bookController;
+	MemberController memberController;
+
+	LibraryManager(BookController bookController,MemberController memberController){
+		this.bookController = bookController;
+		this.memberController = memberController;
+	}
+
+	public void borrowBook(String memberID,Book book){
+
+
+		Member member = memberController.getMember(memberID);
+
+		BorrowDate bd = new BorrowDate(borrowDate,returnDate); // startDate will be tomorrow uptil 7 days
+
+		member.addBorrowBook(book,bd);
+		bookController.addBorrowBook(book,bookController.getBorrowedBooks().getOrDefault(book, 0) + 1);
+
+		System.out.println("Successfully borrowed till " + returnDate);
+
+	}
+	public boolean getAvailabilityOfBook(Book book){
+		Map<Book,Integer> totalBooks = bookController.getTotalBooks();
+
+		int reqdBookCount = totalBooks.getOrDefault(book, 0);
+
+		if(reqdBookCount == 0){
+			throw new NoBookFoundException;
+		}
+
+		Map<Book,Integer> borrowedBooks = bookController.getBorrowedBooks();
+
+		if(borrowedBooks.getOrDefault(book, 0) == reqdBookCount){
+			System.out.println("Sorry! The Book is not available at the moment");
+			return false;
+		}
+
+		return true;
+	}
+	returnBook(String memberID,Book book){
+		Member member = memberController.getMember(memberID);
+
+		BorrowDate bd = member.getBorrowDate(book);
+
+		if(LocalDateTime.Now.isafter(bd.getReturnDate())){
+
+			CalculateFineStrategy fineStrategy = new PremiumBookFine(); // factory design pattern to if book is premium based on MRP category
+
+			double fine = fineStrategy.getBookFine(ReturnDate,LocalDateTime.Now);
+
+			member.addOrSetFine(fine);
+
+			double finePending = member.getFine();
+
+			if(finePending != 0)
+				System.out.println("Returned !!!!!!!!!! Fine Due!! Please Pay the Fine Rs." + finePending);
+
+		}
+	}
+}
+
+//assuming no fine if returned within time 
+//strategy Design pattern fine calculation strategy
+
+Interface CalculateFineStrategy{
+	double getBookFine(LocalDateTime expectedReturnDate, LocalDateTime actualReturnDate);
+}
+
+class PremiumBookFine implements CalculateFineStrategy{
+	
+}
+
+class ClassicBookFine implements CalculateFineStrategy{
+	
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
